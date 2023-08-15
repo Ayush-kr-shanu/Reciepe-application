@@ -12,8 +12,8 @@ module.exports = (sequelize, DataTypes) => {
     image: {
       type: DataTypes.STRING
     },
-    summary: {
-      type: DataTypes.TEXT
+    imageType: {
+      type: DataTypes.STRING
     },
     createdAt: {
       allowNull: false,
