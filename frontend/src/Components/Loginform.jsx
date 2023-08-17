@@ -44,7 +44,7 @@ const LoginForm = ({onLogin}) => {
         Cookies.set('username', data.user.name, { expires: 7 });
         setAlertMessage({ type: 'success', text: data.message });
         setTimeout(() => {
-          navigate('/');
+          navigate('/search');
         }, 2000);
         onLogin(data.user.name);
       } else {

@@ -4,11 +4,13 @@ import Cookies from 'js-cookie';
 import Navbar from './Components/Navbar';
 import LoginForm from './Components/Loginform';
 import SignupForm from './Components/SignupForm';
+import Search from './Components/Seacrh';
+import AuthGuard from './AUthguard';
+import MyRecipe from './Components/Myrecipe';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!Cookies.get('token'));
   const [username, setUsername] = useState('')
-  const [posts, setPosts] = useState([]);
 
   const handleLogin = (username) => {
     setIsLoggedIn(true);
@@ -29,9 +31,19 @@ const App = () => {
     <Router>
       <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} username={username}/>
       <Routes>
-        <Route path="/login" element={<LoginForm onLogin={handleLogin} />} />
+        <Route path="/" element={<LoginForm onLogin={handleLogin} />} />
         <Route path="/signup" element={<SignupForm />} />
+        {/* Use the AuthGuard for the Search route */}
+        <Route
+          path="/search"
+          element={<AuthGuard isLoggedIn={isLoggedIn}><Search /></AuthGuard>}
+        />
+        <Route
+          path="/myrecipe"
+          element={<AuthGuard isLoggedIn={isLoggedIn}><MyRecipe /></AuthGuard>}
+        />
       </Routes>
+      
     </Router>
   );
 };

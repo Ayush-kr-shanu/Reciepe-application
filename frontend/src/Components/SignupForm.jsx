@@ -38,7 +38,7 @@ const SignupForm = () => {
         setAlertMessage({ type: 'success', text: data.msg });
         setTimeout(() => {
           // Redirect to login page after a short delay (2 seconds in this example)
-          navigate('/login');
+          navigate('/');
         }, 2000);
       } else {
         setAlertMessage({ type: 'danger', text: data.msg });
@@ -100,7 +100,7 @@ const SignupForm = () => {
                 </div>
               )}
               <p className="text-center mt-3">
-                Already have an account? <Link to="/login">Login</Link>
+                Already have an account? <Link to="/">Login</Link>
               </p>
             </div>
           </div>
