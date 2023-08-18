@@ -1,7 +1,7 @@
 const express=require("express")
 const axios=require("axios");
 const { authenticate } = require("../middleware/auth");
-const {Recipe}=require("../models/index")
+const { sequelize, Recipe, Step, Ingredient, Equipment }=require("../models/index")
 
 const recepieRoute=express.Router()
 
@@ -25,25 +25,91 @@ recepieRoute.get('/recipes',authenticate, async (req, res) => {
     }
 });
 
-recepieRoute.post('/save-recipe',authenticate, async (req, res) => {
-    const recipeData = req.body;
-    const userId = req.user.id
-  
-    try {
-      // Create a new recipe in the database using the Recipe model
-      const createdRecipe = await Recipe.create({
+recepieRoute.get('/get-recipe/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const spoonacularUrl = `https://api.spoonacular.com/recipes/${id}/analyzedInstructions`;
+    const apiKey = process.env.SPOONACULAR_API_KEY;
+
+    const response = await axios.get(spoonacularUrl, {
+      params: {
+        apiKey: apiKey,
+      },
+    });
+
+    const recipeInstructions = response.data;
+    res.json(recipeInstructions);
+  } catch (error) {
+    console.error('Error fetching recipe instructions:', error);
+    res.status(500).json({ error: 'An error occurred while fetching recipe instructions.' });
+  }
+});
+
+recepieRoute.post('/save-recipe', authenticate, async (req, res) => {
+  const recipeData = req.body;
+  const userId = req.user.id;
+
+  const transaction = await sequelize.transaction(); // Start a transaction
+
+  try {
+    const createdRecipe = await Recipe.create(
+      {
         title: recipeData.title,
         image: recipeData.image,
         imageType: recipeData.imageType,
-        userId: userId 
-      });
-  
-      console.log('Recipe saved successfully');
-      res.json({ message: 'Recipe saved successfully', recipe: createdRecipe });
-    } catch (err) {
-      res.status(500).json({ error: 'An error occurred while saving the recipe', err:err.message });
+        userId: userId,
+      },
+      { transaction } // Pass the transaction object
+    );
+
+    for (const stepData of recipeData.steps) {
+      const createdStep = await Step.create(
+        {
+          number: stepData.number,
+          step_text: stepData.step,
+          length_number: stepData.length ? stepData.length.number : null,
+          length_unit: stepData.length ? stepData.length.unit : null,
+          recipeId: createdRecipe.id,
+        },
+        { transaction } // Pass the transaction object
+      );
+
+      for (const ingredientData of stepData.ingredients) {
+        await Ingredient.create(
+          {
+            name: ingredientData.name,
+            local_name: ingredientData.localizedName,
+            image: ingredientData.image,
+            stepId: createdStep.id,
+          },
+          { transaction } // Pass the transaction object
+        );
+      }
+
+      for (const equipmentData of stepData.equipment) {
+        await Equipment.create(
+          {
+            name: equipmentData.name,
+            local_name: equipmentData.localizedName,
+            image: equipmentData.image,
+            stepId: createdStep.id,
+          },
+          { transaction } // Pass the transaction object
+        );
+      }
     }
+
+    await transaction.commit(); // Commit the transaction
+
+    console.log('Recipe saved successfully');
+    res.json({ message: 'Recipe saved successfully', recipe: createdRecipe });
+  } catch (err) {
+    await transaction.rollback(); // Rollback the transaction if an error occurs
+    res.status(500).json({ error: 'An error occurred while saving the recipe', err: err.message });
+  }
 });
+
+
 
 recepieRoute.get('/save-recipe', authenticate, async (req, res) => {
   const userId = req.user.id; 

@@ -13,7 +13,8 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING
     },
     imageType: {
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
+      defaultValue: "jpg"
     },
     createdAt: {
       allowNull: false,

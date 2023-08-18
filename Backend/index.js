@@ -21,7 +21,7 @@ app.use("/", recepieRoute)
 
 
 db.sequelize.sync().then(() => {
-    app.listen(4500, ()=>{
+    app.listen(4501, ()=>{
         console.log("server is running");
     })
 }).catch((err) => {

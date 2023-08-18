@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Input, Button, Container, Box, Heading, Grid, GridItem, Image, useToast } from '@chakra-ui/react';
+import { Link } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import url from './Url';
 
@@ -91,6 +92,7 @@ const Search = () => {
             <Image src={recipe.image} alt={recipe.title} objectFit="cover" h="200px" width="100%" mb={2} />
             <Heading as="h2" size="md" mb={2}>{recipe.title}</Heading>
             <Button onClick={() => handleSaveRecipe(recipe)} colorScheme="red">Save Recipe</Button>
+            <Link to={`/recipe/${recipe.id}`}><Button mt={2} colorScheme="blue">Read More</Button></Link>
           </GridItem>
         ))}
       </Grid>

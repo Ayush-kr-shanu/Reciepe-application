@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import Cookies from 'js-cookie';
 import Navbar from './Components/Navbar';
@@ -7,10 +7,26 @@ import SignupForm from './Components/SignupForm';
 import Search from './Components/Seacrh';
 import AuthGuard from './AUthguard';
 import MyRecipe from './Components/Myrecipe';
+import RecipeDetails from './Components/RecipeDetail';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!Cookies.get('token'));
   const [username, setUsername] = useState('')
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const queryToken = queryParams.get('token');
+    
+    if (queryToken) {
+      Cookies.set('token', queryToken, { expires: 7 });
+      setIsLoggedIn(true);
+    } else {
+      const token = Cookies.get('token');
+      if (token) {
+        setIsLoggedIn(true);
+      }
+    }
+  }, []);
 
   const handleLogin = (username) => {
     setIsLoggedIn(true);
@@ -42,6 +58,7 @@ const App = () => {
           path="/myrecipe"
           element={<AuthGuard isLoggedIn={isLoggedIn}><MyRecipe /></AuthGuard>}
         />
+        <Route path="/recipe/:id" element={<RecipeDetails />}/>
       </Routes>
       
     </Router>
