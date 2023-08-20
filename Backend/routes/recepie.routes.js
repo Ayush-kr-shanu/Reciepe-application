@@ -1,7 +1,8 @@
 const express=require("express")
 const axios=require("axios");
 const { authenticate } = require("../middleware/auth");
-const { sequelize, Recipe, Step, Ingredient, Equipment }=require("../models/index")
+const {User}=require("../models/User.model")
+const {Recipe}=require("../models/recipe")
 
 const recepieRoute=express.Router()
 
@@ -25,6 +26,8 @@ recepieRoute.get('/recipes',authenticate, async (req, res) => {
     }
 });
 
+
+
 recepieRoute.get('/get-recipe/:id', async (req, res) => {
   try {
     const id = req.params.id;
@@ -45,108 +48,63 @@ recepieRoute.get('/get-recipe/:id', async (req, res) => {
   }
 });
 
-recepieRoute.post('/save-recipe', authenticate, async (req, res) => {
-  const recipeData = req.body;
-  const userId = req.user.id;
 
-  const transaction = await sequelize.transaction(); // Start a transaction
+recepieRoute.post('/save-recipe',authenticate, async (req, res) => {
+  const recipeData = req.body;
+  const userId = req.user.id
 
   try {
-    const createdRecipe = await Recipe.create(
-      {
-        title: recipeData.title,
-        image: recipeData.image,
-        imageType: recipeData.imageType,
-        userId: userId,
-      },
-      { transaction } // Pass the transaction object
-    );
-
-    for (const stepData of recipeData.steps) {
-      const createdStep = await Step.create(
-        {
-          number: stepData.number,
-          step_text: stepData.step,
-          length_number: stepData.length ? stepData.length.number : null,
-          length_unit: stepData.length ? stepData.length.unit : null,
-          recipeId: createdRecipe.id,
-        },
-        { transaction } // Pass the transaction object
-      );
-
-      for (const ingredientData of stepData.ingredients) {
-        await Ingredient.create(
-          {
-            name: ingredientData.name,
-            local_name: ingredientData.localizedName,
-            image: ingredientData.image,
-            stepId: createdStep.id,
-          },
-          { transaction } // Pass the transaction object
-        );
-      }
-
-      for (const equipmentData of stepData.equipment) {
-        await Equipment.create(
-          {
-            name: equipmentData.name,
-            local_name: equipmentData.localizedName,
-            image: equipmentData.image,
-            stepId: createdStep.id,
-          },
-          { transaction } // Pass the transaction object
-        );
-      }
-    }
-
-    await transaction.commit(); // Commit the transaction
+    // Create a new recipe in the database using the Recipe model
+    const createdRecipe = await Recipe.create({
+      title: recipeData.title,
+      image: recipeData.image,
+      imageType: recipeData.imageType,
+      userId: userId 
+    });
 
     console.log('Recipe saved successfully');
     res.json({ message: 'Recipe saved successfully', recipe: createdRecipe });
   } catch (err) {
-    await transaction.rollback(); // Rollback the transaction if an error occurs
-    res.status(500).json({ error: 'An error occurred while saving the recipe', err: err.message });
+    res.status(500).json({ error: 'An error occurred while saving the recipe', err:err.message });
   }
 });
 
-
-
 recepieRoute.get('/save-recipe', authenticate, async (req, res) => {
-  const userId = req.user.id; 
+const userId = req.user.id; 
 
-  try {
-    // Find all recipes associated with the user's ID
-    const savedRecipes = await Recipe.findAll({
-      where: { userId }
-    });
+try {
+  // Find all recipes associated with the user's ID
+  const savedRecipes = await Recipe.findAll({
+    where: { userId }
+  });
 
-    res.json(savedRecipes);
-  } catch (err) {
-    res.status(500).json({ error: 'An error occurred while fetching saved recipes', err:err.message });
-  }
+  res.json(savedRecipes);
+} catch (err) {
+  res.status(500).json({ error: 'An error occurred while fetching saved recipes', err:err.message });
+}
 });
 
 recepieRoute.delete("/delete-recipe/:recipeId", authenticate, async (req, res) => {
-  const userId = req.user.id;
-  const recipeId = req.params.recipeId;
+const userId = req.user.id;
+const recipeId = req.params.recipeId;
 
-  try {
-    // Find the recipe to delete
-    const recipeToDelete = await Recipe.findOne({
-      where: { id: recipeId, userId },
-    });
+try {
+  // Find the recipe to delete
+  const recipeToDelete = await Recipe.findOne({
+    where: { id: recipeId, userId },
+  });
 
-    if (!recipeToDelete) {
-      return res.status(404).json({ message: 'Recipe not found' });
-    }
-
-    // Delete the recipe
-    await recipeToDelete.destroy();
-
-    res.json({ message: 'Recipe deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ error: 'An error occurred while deleting the recipe', err:err.message });
+  if (!recipeToDelete) {
+    return res.status(404).json({ message: 'Recipe not found' });
   }
+
+  // Delete the recipe
+  await recipeToDelete.destroy();
+
+  res.json({ message: 'Recipe deleted successfully' });
+} catch (err) {
+  res.status(500).json({ error: 'An error occurred while deleting the recipe', err:err.message });
+}
 });
 
 

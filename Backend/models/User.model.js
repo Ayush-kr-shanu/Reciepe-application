@@ -1,17 +1,19 @@
-module.exports = (sequelize, DataTypes) => {
-    const User = sequelize.define("User", {
+const sequelize = require("sequelize");
+const { seq } = require("../config/config");
+    
+    const User = seq.define("User", {
       id: {
-        type: DataTypes.INTEGER,
+        type: sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
       name: {
-        type: DataTypes.STRING,
+        type: sequelize.STRING,
         allowNull: false,
       },
       email: {
-        type: DataTypes.STRING,
+        type: sequelize.STRING,
         allowNull: false,
         unique: true,
         validate: {
@@ -21,21 +23,19 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       password: {
-        type: DataTypes.STRING,
+        type: sequelize.STRING,
         allowNull: false,
       },
       createdAt: {
-        type: DataTypes.DATE,
+        type: sequelize.DATE,
         allowNull: false,
-        defaultValue: DataTypes.NOW,
+        defaultValue: sequelize.NOW,
       },
       updatedAt: {
-        type: DataTypes.DATE,
+        type: sequelize.DATE,
         allowNull: false,
-        defaultValue: DataTypes.NOW,
+        defaultValue: sequelize.NOW,
       },
     });
-    
-    
-    return User
-    }
+
+module.exports={User}

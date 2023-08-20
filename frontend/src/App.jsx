@@ -7,7 +7,6 @@ import SignupForm from './Components/SignupForm';
 import Search from './Components/Seacrh';
 import AuthGuard from './AUthguard';
 import MyRecipe from './Components/Myrecipe';
-import RecipeDetails from './Components/RecipeDetail';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!Cookies.get('token'));
@@ -58,7 +57,6 @@ const App = () => {
           path="/myrecipe"
           element={<AuthGuard isLoggedIn={isLoggedIn}><MyRecipe /></AuthGuard>}
         />
-        <Route path="/recipe/:id" element={<RecipeDetails />}/>
       </Routes>
       
     </Router>

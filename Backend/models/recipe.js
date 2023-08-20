@@ -1,31 +1,34 @@
-module.exports = (sequelize, DataTypes) => {
-  const Recipe = sequelize.define("Recipe", {
+const sequelize = require("sequelize");
+const { seq } = require("../config/config");
+
+
+  const Recipe = seq.define("Recipe", {
     id: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
-      type: DataTypes.INTEGER
+      type: sequelize.INTEGER
     },
     title: {
-      type: DataTypes.STRING
+      type: sequelize.STRING
     },
     image: {
-      type: DataTypes.STRING
+      type: sequelize.STRING
     },
     imageType: {
-      type: DataTypes.STRING,
+      type: sequelize.STRING,
       defaultValue: "jpg"
     },
     createdAt: {
       allowNull: false,
-      type: DataTypes.DATE
+      type: sequelize.DATE
     },
     updatedAt: {
       allowNull: false,
-      type: DataTypes.DATE
+      type: sequelize.DATE
     },
     userId:{
-      type: DataTypes.INTEGER,
+      type: sequelize.INTEGER,
       allowNull: false,
       references: {
         model: "User",
@@ -34,5 +37,5 @@ module.exports = (sequelize, DataTypes) => {
     }
 
   });
-  return Recipe;
-};
+  
+module.exports={Recipe}
